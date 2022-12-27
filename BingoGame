@@ -1,0 +1,316 @@
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+@SuppressWarnings("serial")
+public class BingoGame extends JFrame {
+
+	public static int WINNERCHECK = 0;
+	public static final int WIDTH = 1300;
+	public static final int LENGTH = 1000;
+
+	JLabel label;
+
+	private JPanel panel; // 패널 생성
+	private JButton reset; // 게임을 재시작해주는 버튼
+	private JButton exit; // 게임을 나가는 버튼
+	private JButton winRate; // 게임의 승률을 보게 해주는 버튼
+	private Container layout;
+
+	private BingoNumbers bingoNumbers;
+	private BingoGridHuman humanGrid;
+	private BingoGridComputer computerGrid;
+
+	private ActionListener buttonListener;
+
+	private boolean winner = false;
+
+	// 단어 넣어주는 역할
+	private int number = 0;
+	private Map<Integer, Quiz> voc = new HashMap<>();
+
+	// 게임 결과를 기록하고 불러오기 위함
+	LogSave lg = new LogSave("playRecord.txt");
+
+	void addWord(Quiz quiz) {
+		voc.put(number++, quiz);
+	}
+
+	void makeVoc() {
+
+		try (Scanner scan = new Scanner(new File("quiz.txt"))) {
+			while (scan.hasNextLine()) {
+				String str = scan.nextLine();
+				String[] temp = str.split("\t");
+				this.addWord(new Quiz(temp[0].trim(), temp[1].trim()));
+			}
+
+		} catch (FileNotFoundException e) {
+			System.out.println("\n파일명을 확인하세요.");
+		}
+	}
+
+	JTextField tf = new JTextField(20);
+
+	public BingoGame() {
+		super("BINGO GAME - 202211335 이명종");
+		makeVoc();
+
+		setSize(WIDTH, LENGTH);
+
+		panel = new JPanel();
+
+		// JButtons
+		reset = new JButton("Reset");
+		exit = new JButton("Exit");
+		winRate = new JButton("Winning Rate");
+
+		panel.setLayout(new FlowLayout());
+		panel.add(new JLabel("영단어 입력 후 <Enter> 키를 입력하세요"));
+		panel.add(tf);
+		panel.add(reset);
+		panel.add(exit);
+		panel.add(winRate);
+
+		// 버튼에 마우스를 올리면 그 버튼의 기능을 알려준다
+		tf.setToolTipText("Enter a word");
+		reset.setToolTipText("Resets the game");
+		exit.setToolTipText("Stops the game");
+		winRate.setToolTipText("Chick to Show Winning Rate");
+
+		// adds ActionListeners to buttons
+		buttonListener = new ButtonListener();
+		reset.addActionListener(buttonListener);
+		tf.addActionListener(buttonListener);
+		exit.addActionListener(buttonListener);
+		winRate.addActionListener(buttonListener);
+
+		layout = this.getContentPane();
+		layout.add(panel, "South");
+		setVisible(true);
+
+		computerGrid = new BingoGridComputer();
+		humanGrid = new BingoGridHuman();
+		bingoNumbers = new BingoNumbers();
+
+		add(humanGrid);
+		setVisible(true);
+
+		add(computerGrid);
+		setVisible(true);
+
+		add(bingoNumbers);
+		setVisible(true);
+
+	}
+
+	// button listener
+	class ButtonListener implements ActionListener {
+		// wnum, check는 사용자 입력에 사용된다.
+		int wnum = -1;
+		int check = 0;
+
+		@SuppressWarnings("static-access")
+		public void actionPerformed(ActionEvent event) {
+			Object source = event.getSource();
+			if (source == reset) { // 게임 재시작
+				String[] R_check = { "재시작", "게임으로 돌아가기" };
+				int num = JOptionPane.showOptionDialog(null, "정말로 다시 시작하시겠습니까?", "안내", JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE, null, R_check, "게임으로 돌아가기");
+				if (num == 0) {
+
+					computerGrid.initializeGrid();
+					humanGrid.initializeGrid();
+
+					bingoNumbers.Callednumbers.clear();
+					bingoNumbers.numbers.clear();
+					bingoNumbers.pnumbers.clear();
+					winner = false;
+				}
+
+			} else if (source == winRate) { // 승률 보기
+				lg.read();
+				double p_rate = 50.0;
+				double c_rate = 50.0;
+				if (lg.c_win + lg.p_win == 0) {
+				} else {
+					p_rate = ((double) lg.p_win / ((double) lg.c_win + (double) lg.p_win)) * 100;
+					p_rate = (double) Math.round(p_rate * 100) / 100;
+
+					c_rate = 100 - p_rate;
+				}
+
+				String[] E_check = { "확인", "기록 초기화" };
+				int num = JOptionPane.showOptionDialog(null,
+						"사용자 : " + lg.p_win + "승 " + lg.c_win + "패(승률 : " + p_rate + "%)" + "\n컴퓨터 : " + lg.c_win + "승 "
+								+ lg.p_win + "패(승률 : " + c_rate + "%)",
+						"승률", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, E_check, "확인");
+				if (num == 1) {
+					String[] reset_check = { "초기화", "돌아가기" };
+					int resetchecknum = JOptionPane.showOptionDialog(null, "정말로 초기화 하시겠습니까?", "경고",
+							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, reset_check, "돌아가기");
+					if (resetchecknum == 0) {
+						lg.c_win = 0;
+						lg.p_win = 0;
+						lg.p_win_rate = 50.0;
+						try (BufferedWriter bf = Files.newBufferedWriter(Path.of("playRecord.txt"),
+								StandardOpenOption.TRUNCATE_EXISTING)) {
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+
+			} else if (source == exit) { // 게임 종료
+				String[] E_check = { "종료", "게임으로 돌아가기" };
+				int num = JOptionPane.showOptionDialog(null, "정말로 종료하시겠습니까?", "안내", JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE, null, E_check, "게임으로 돌아가기");
+				if (num == 0) {
+					System.exit(0);
+				}
+
+			} else if (tf.getText() != null) {
+				if (!winner) { // 사용자 입력
+					for (int i = 0; i < voc.size(); i++) {
+						if (voc.get(i).eng.equals(tf.getText())) {
+							wnum = i;
+							check = 1;
+						}
+					}
+					if (check == 0) {
+						wnum = -1;
+					}
+					check = 0;
+					bingoNumbers.generateNumber(wnum);
+					computerGrid.priocheck();
+					computerGrid.highlightSquare();
+					humanGrid.highlightSquare();
+
+					humanGrid.isCalled();
+
+					if (humanGrid.checkWin() && computerGrid.checkWin()) { // 무승부 확인
+
+						WINNERCHECK = 0;
+						computerGrid.highlightSquare();
+						humanGrid.highlightSquare();
+
+						LogSave.setFilePath("playRecord.txt");
+						lg.read();
+						lg.write(String.valueOf(lg.p_win), String.valueOf(lg.c_win));
+						lg.read();
+						double p_rate = 50.0;
+						double c_rate = 50.0;
+						if (lg.c_win + lg.p_win == 0) {
+						} else {
+							p_rate = ((double) lg.p_win / ((double) lg.c_win + (double) lg.p_win)) * 100;
+							p_rate = (double) Math.round(p_rate * 100) / 100;
+
+							c_rate = 100 - p_rate;
+						}
+						computerGrid.highlightSquare();
+						humanGrid.highlightSquare();
+						computerGrid.repaint();
+						humanGrid.repaint();
+
+						bingoNumbers.repaint();
+						JOptionPane.showMessageDialog(null,
+								"사용자 : " + lg.p_win + "승 " + lg.c_win + "패(승률 : " + p_rate + "%)" + "\n컴퓨터 : "
+										+ lg.c_win + "승 " + lg.p_win + "패(승률 : " + c_rate + "%)",
+								"무승부", JOptionPane.INFORMATION_MESSAGE);
+
+						winner = true;
+					} else if (humanGrid.checkWin()) { // 사용자가 이겼을 경우
+
+						WINNERCHECK = 1;
+						computerGrid.highlightSquare();
+						humanGrid.highlightSquare();
+
+						LogSave.setFilePath("playRecord.txt");
+						lg.read();
+						lg.write(String.valueOf(lg.p_win + 1), String.valueOf(lg.c_win));
+						lg.read();
+						double p_rate = 50.0;
+						double c_rate = 50.0;
+						if (lg.c_win + lg.p_win == 0) {
+						} else {
+							p_rate = ((double) lg.p_win / ((double) lg.c_win + (double) lg.p_win)) * 100;
+							p_rate = (double) Math.round(p_rate * 100) / 100;
+
+							c_rate = 100 - p_rate;
+						}
+
+						computerGrid.highlightSquare();
+						humanGrid.highlightSquare();
+						computerGrid.repaint();
+						humanGrid.repaint();
+
+						bingoNumbers.repaint();
+						JOptionPane.showMessageDialog(null,
+								"사용자 : " + lg.p_win + "승 " + lg.c_win + "패(승률 : " + p_rate + "%)" + "\n컴퓨터 : "
+										+ lg.c_win + "승 " + lg.p_win + "패(승률 : " + c_rate + "%)",
+								"플레이어 승리", JOptionPane.INFORMATION_MESSAGE);
+
+						winner = true;
+					} else if (computerGrid.checkWin()) { // 컴퓨터가 이긴 경우
+
+						WINNERCHECK = 2;
+						computerGrid.highlightSquare();
+						humanGrid.highlightSquare();
+
+						LogSave.setFilePath("playRecord.txt");
+						lg.read();
+						lg.write(String.valueOf(lg.p_win), String.valueOf(lg.c_win + 1));
+						lg.read();
+						double p_rate = 50.0;
+						double c_rate = 50.0;
+						if (lg.c_win + lg.p_win == 0) {
+						} else {
+							p_rate = ((double) lg.p_win / ((double) lg.c_win + (double) lg.p_win)) * 100;
+							p_rate = (double) Math.round(p_rate * 100) / 100;
+
+							c_rate = 100 - p_rate;
+						}
+						computerGrid.highlightSquare();
+						humanGrid.highlightSquare();
+						computerGrid.repaint();
+						humanGrid.repaint();
+
+						bingoNumbers.repaint();
+						JOptionPane.showMessageDialog(null,
+								"사용자 : " + lg.p_win + "승 " + lg.c_win + "패(승률 : " + p_rate + "%)" + "\n컴퓨터 : "
+										+ lg.c_win + "승 " + lg.p_win + "패(승률 : " + c_rate + "%)",
+								"컴퓨터 승리", JOptionPane.INFORMATION_MESSAGE);
+						winner = true;
+					}
+
+				}
+				tf.setText("");
+			}
+
+			computerGrid.highlightSquare();
+			humanGrid.highlightSquare();
+			computerGrid.repaint();
+			humanGrid.repaint();
+			bingoNumbers.repaint();
+			layout.repaint();
+		}
+	}
+}
