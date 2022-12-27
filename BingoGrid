@@ -1,0 +1,237 @@
+
+import javax.swing.JComponent;
+
+
+//빙고판
+
+@SuppressWarnings("serial")
+public class BingoGrid extends JComponent {
+
+	public BingoSquare[][] grid;
+
+	public static int SQUARE_SIZE = 90;
+	public static int NSIZE = 5; // 7 - 85,5-90
+
+	public static final String[] BINGO = { "A", " B", "C", "D", "E", "F", "G" };
+	public int indentX;
+	public int indentY;
+
+	public int k;
+
+	// BingoGrid 생성자
+	public BingoGrid() {
+		grid = new BingoSquare[NSIZE][NSIZE];
+	}
+
+	// 만약 값이 이미 들어가있다면 그 값을 체크해주는 역할을 해줌
+	public boolean isFound(int value, int r, int c) {
+		for (int row = 0; row < r; row++) {
+			for (int col = 0; col <= c; col++) {
+				if (value == grid[row][col].getValue()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// BingoSquare 오브젝트를 만들어준다
+	public void initializeGrid() {
+		for (int row = 0; row < grid.length; row++) {
+			for (int col = 0; col < grid[0].length; col++) {
+				grid[row][col] = new BingoSquare(col * SQUARE_SIZE + indentX, row * SQUARE_SIZE + indentY, SQUARE_SIZE,
+						SQUARE_SIZE);
+
+				int value = grid[row][col].createNum(col + 1);
+				while (isFound(value, row, col))
+					value = grid[row][col].createNum(col + 1);
+				// 겹치는 거 없도록
+			}
+		}
+	}
+
+	// 빙고판을 체크해서 승패를 결정해주는 역할
+	// winBiogo는 빙고 승리 조건을 정해준다
+	public static int winBingo = 3;
+
+	public boolean checkWin() {
+		int winningNumber = NSIZE;
+		int count1 = 0, count2 = 0, count3 = 0, count4 = 0;
+		int rownum[] = new int[NSIZE];
+		int colnum[] = new int[NSIZE];
+		int Bingocount = 0;
+
+		// checks the rows
+		for (int row = 0; row < grid.length; row++) {
+			count1 = 0;
+			for (int col = 0; col < grid[0].length; col++) {
+				if (grid[row][col].getStatus()) {
+					count1++;
+					rownum[row]++;
+				}
+
+				if (count1 == winningNumber) {
+					Bingocount++;
+				}
+
+				if (Bingocount == winBingo) {
+					for (int i = 0; i < NSIZE; i++) {
+						if (rownum[i] == winningNumber) {
+							for (int c = 0; c < rownum[i]; c++) {
+								grid[i][c].setIsWinner(true);
+							}
+						}
+						if (colnum[i] == winningNumber) {
+							for (int c = 0; c < colnum[i]; c++) {
+								grid[c][i].setIsWinner(true);
+							}
+						}
+						if (count3 == winningNumber) {
+							for (int c = 0; c < NSIZE; c++) {
+								grid[c][c].setIsWinner(true);
+							}
+						}
+						if (count4 == winningNumber) {
+							for (int c = NSIZE - 1; c >= 0; c--)
+								grid[c][(NSIZE = 1) - c].setIsWinner(true);
+						}
+					}
+					return true;
+				}
+			}
+			this.removeIsWinnerMark();
+		}
+
+		// checks the columns
+		for (int col = 0; col < grid[0].length; col++) {
+			count2 = 0;
+			for (int row = 0; row < grid.length; row++) {
+				if (grid[row][col].getStatus()) {
+					colnum[col]++;
+					count2++;
+				}
+
+				if (count2 == winningNumber) {
+					Bingocount++;
+				}
+
+				if (Bingocount == winBingo) {
+					for (int i = 0; i < NSIZE; i++) {
+						if (rownum[i] == winningNumber) {
+							for (int c = 0; c < rownum[i]; c++) {
+								grid[i][c].setIsWinner(true);
+							}
+						}
+						if (colnum[i] == winningNumber) {
+							for (int c = 0; c < colnum[i]; c++) {
+								grid[c][i].setIsWinner(true);
+							}
+						}
+						if (count3 == winningNumber) {
+							for (int c = 0; c < NSIZE; c++) {
+								grid[c][c].setIsWinner(true);
+							}
+						}
+						if (count4 == winningNumber) {
+							for (int c = NSIZE - 1; c >= 0; c--)
+								grid[c][(NSIZE = 1) - c].setIsWinner(true);
+						}
+					}
+					return true;
+				}
+			}
+			this.removeIsWinnerMark();
+		}
+
+		// 대각선 체크 우하향
+		count3 = 0;
+		for (int index = 0; index < grid.length; index++) {
+			BingoSquare square = grid[index][index];
+			if (square.getStatus()) {
+				count3++;
+			}
+
+			if (count3 == winningNumber) {
+				Bingocount++;
+			}
+
+			if (Bingocount == winBingo) {
+				for (int i = 0; i < NSIZE; i++) {
+					if (rownum[i] == winningNumber) {
+						for (int c = 0; c < rownum[i]; c++) {
+							grid[i][c].setIsWinner(true);
+						}
+					}
+					if (colnum[i] == winningNumber) {
+						for (int c = 0; c < colnum[i]; c++) {
+							grid[c][i].setIsWinner(true);
+						}
+					}
+					if (count3 == winningNumber) {
+						for (int c = 0; c < NSIZE; c++) {
+							grid[c][c].setIsWinner(true);
+						}
+					}
+					if (count4 == winningNumber) {
+						for (int c = NSIZE - 1; c >= 0; c--)
+							grid[c][(NSIZE = 1) - c].setIsWinner(true);
+					}
+				}
+				return true;
+			}
+		}
+
+		this.removeIsWinnerMark();
+
+		// 대각선 체크 우상향
+		count4 = 0;
+		for (int index = grid.length - 1; index >= 0; index--) {
+			BingoSquare square = grid[index][(grid.length - 1) - index];
+			if (square.getStatus()) {
+				count4++;
+			}
+
+			if (count4 == winningNumber) {
+				Bingocount++;
+			}
+
+			if (Bingocount == winBingo) {
+				for (int i = 0; i < NSIZE; i++) {
+					if (rownum[i] == winningNumber) {
+						for (int c = 0; c < rownum[i]; c++) {
+							grid[i][c].setIsWinner(true);
+						}
+					}
+					if (colnum[i] == winningNumber) {
+						for (int c = 0; c < colnum[i]; c++) {
+							grid[c][i].setIsWinner(true);
+						}
+					}
+					if (count3 == winningNumber) {
+						for (int c = 0; c < NSIZE; c++) {
+							grid[c][c].setIsWinner(true);
+						}
+					}
+					if (count4 == winningNumber) {
+						for (int c = NSIZE - 1; c >= 0; c--)
+							grid[c][(NSIZE - 1) - c].setIsWinner(true);
+					}
+				}
+				return true;
+			}
+		}
+
+		this.removeIsWinnerMark();
+		return false;
+	}
+
+	// 승패가 결정되면 빙고가 만들어진 칸을 진한 색으로 칠해주는데, 칠한 것을 지워줄 때 사용
+	public void removeIsWinnerMark() {
+		for (int row = 0; row < grid.length; row++) {
+			for (int col = 0; col < grid[0].length; col++) {
+				grid[row][col].setIsWinner(false);
+			}
+		}
+	}
+
+}
