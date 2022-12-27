@@ -1,0 +1,69 @@
+
+import java.awt.Rectangle;
+import java.util.Random;
+
+@SuppressWarnings("serial")
+public class BingoSquare extends Rectangle
+{
+    private int value;
+    private boolean status; //만약 value가 불렸다면 참이 된다.
+    //원래 클릭도 되도록 만들었는데, 프로젝트를 진행하다보니 기능이 겹쳐서 이름대로는 기능을 하지 않는 친구. grid칸이 불렸다면 참이 된다. 
+    private boolean isClicked;     
+    private static final int RANGE = 15; //col에 들어가는 단어(숫자)의 범위 
+    //예를들어 A col 에는 1~15 사이의 숫자 즉, 단어장에서 1~15번의 단어만 들어간다는 의미
+    private boolean isWinner; //승자인가를 알려주는 친구
+
+    
+    private Random generator = new Random();
+
+    
+    public BingoSquare(int x1, int y1, int width, int height) {
+        super(x1, y1, width, height);
+        status = false;
+        isClicked = false;
+        isWinner = false;
+    }
+
+    //값을 설정해주는 친구
+    public void setValue(int newValue) {
+        value = newValue;
+    }
+    //그 값을 가져와주는 친구
+    public int getValue() {
+        return value;
+    }
+
+    //칸이 불렸는가 아닌가를 저장해주는 친구
+    public void setStatus(boolean newStatus) {
+        status = newStatus;
+    }
+    //그 저장 상태를 가져와주는 친구
+    public boolean getStatus() {
+        return status;
+    }
+
+    //선택되었는가? 설정해주는 친구
+    public void setIsClicked(boolean newIsClicked) {
+        isClicked = newIsClicked;
+    }
+
+    public boolean getIsClicked() {
+        return isClicked;
+    }
+    
+    //승패를 정해주는 친구 
+    public void setIsWinner(boolean newIsWinner) {
+        isWinner = newIsWinner;
+    }
+    public boolean getIsWinner() {
+        return isWinner;
+    }
+
+   
+    //square에 각각의 숫자를 정해준다.
+    public int createNum(int col) {
+        int temp = RANGE * (col - 1) + (generator.nextInt(RANGE) + 1);
+        value = temp;
+        return temp;
+    }
+}
