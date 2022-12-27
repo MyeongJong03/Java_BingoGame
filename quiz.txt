@@ -1,0 +1,106 @@
+about	약/~대한
+advice	조언/충고
+animal	동물
+arrive	도착하다
+answer	대답/해답
+boil	끓다
+bright	밝은/눈부신
+bring	가져오다
+clothes	옷/의복
+cover	덮다/씌우다
+correct	정확한
+sex	성/성별
+delay	지연/지체
+diary	수첩
+empty	빈/공허한
+fault	잘못/책임
+health	건강
+huge	막대한/거대한
+hope	희망
+history	역사
+gravity	중력	
+friend	친구
+future	미래
+lock	잠그다/좌물쇠
+notice	주목/안내판
+rule	규칙
+sound	소리
+warm	따듯한
+tall	키가 큰/높은
+serious	심각한/진지한
+return	돌아오다/반납하다	
+castle	성
+endow	부여하다/ 기부하다
+explain	설명하다
+female	여성의
+study	공부하다
+illegal	불법적인
+paper	종이
+lamp	램프/등
+inherit	상속하다/ 이어받다
+insider	내부자
+invent	발명하다/ 만들다
+last	마지막/ 지난/ 계속하다
+lately	최근에
+law	법
+lawful	법적인
+legal	합법적인
+male	남성의
+of late	최근에
+oppress	억압하다
+press	누르다/ 언론/ 출판
+region	지역
+rib	갈비뼈
+social	사회적인
+society	사회
+state	상태/ 진술하다
+subway	지하철
+symbol	상징/ 징표
+train	기차/ 훈련시키다
+abbr	약어/약자
+acorn	도토리
+ballot	투표
+bacon	베이컨
+incline	기울다/경사지다
+infamy	오명/불명예
+knob	손잡이/꼭지
+lapse	소멸되다
+macro	거시적인/거대한
+mist	안개/농무
+bread	빵
+oat	귀리
+trainer	훈련자
+training	훈련
+universal	우주의/ 일반적인
+symbolic	상징적인
+therefore	그러므로
+incentive	장려책/격려금
+monastery	수도원/승원
+nicotine	니코틴/담뱃진
+smallpox	천연두
+consider	고려하다/ 간주하다
+Ronaldo	우리형/호날두
+universally	보편적으로/ 일반적으로
+considerable	상당한
+eclipse	일식/월식
+invention	발명
+education	교육
+recently	최근에
+at first	처음에는
+nowadays	최근에
+statement	진술
+suppress	저하시키다
+educational	교육적인
+regional	지역적인
+reinforce	강화시키다
+religion	종교
+religious	종교적인
+instead of	～대신에
+sociable	사교적인
+intelligence	지식
+intelligent	지적인
+explanation	설명
+endowment	기부/ 기증
+enlighten	계몽시키다 개화시키다
+oppression	억압
+socialize	사회화하다
