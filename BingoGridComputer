@@ -1,0 +1,373 @@
+package z_BINGOTEST;
+
+import java.awt.RenderingHints;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Font;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Scanner;
+import java.awt.Color;
+
+//컴퓨터의 빙고판
+
+@SuppressWarnings("serial")
+public class BingoGridComputer extends BingoGrid {
+
+	public BingoGridComputer() {
+		super();
+		if (NSIZE == 7) {
+			indentX = 670;
+			indentY = 150;
+		} else if (NSIZE == 6) {
+			indentX = 700;
+			indentY = 180;
+		} else {
+			indentX = 730;
+			indentY = 210;
+		}
+		initializeGrid();
+	}
+
+	// 단어 넣어주는 역할
+	private int number = 0;
+	private Map<Integer, Quiz> voc = new HashMap<>();
+
+	void addWord(Quiz quiz) {
+		voc.put(number++, quiz);
+	}
+
+	void makeVoc() {
+
+		try (Scanner scan = new Scanner(new File("quiz.txt"))) {
+			while (scan.hasNextLine()) {
+				String str = scan.nextLine();
+				String[] temp = str.split("\t");
+				this.addWord(new Quiz(temp[0].trim(), temp[1].trim()));
+			}
+
+		} catch (FileNotFoundException e) {
+			System.out.println("\n파일명을 확인하세요.");
+		}
+	}
+
+	// 빙고판 그려주는 역할
+	public void paintComponent(Graphics g) {
+		makeVoc();
+		Graphics2D g2 = (Graphics2D) g;
+
+		// 안티앨리어싱 이용
+		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+		int fontSize = 25;
+		int letterFont = 40;
+		Font font = new Font("SansSerif", Font.PLAIN, fontSize);
+		Font font2 = new Font("SansSerif", Font.BOLD, letterFont);
+		g2.setFont(font);
+		;
+
+		// 빙고판 그리는 부분
+		for (int row = 0; row < grid.length; row++) {
+			for (int col = 0; col < grid.length; col++) {
+				BingoSquare square = grid[row][col];
+
+				g2.draw(square);
+				if (square.getIsClicked()) {
+					g2.setColor(Color.PINK);
+					if (square.getIsWinner()) {
+						g2.setColor(Color.RED);
+					}
+					g2.fill(square);
+					g2.setColor(Color.BLACK);
+					g2.draw(square);
+				}
+
+				int value = grid[row][col].getValue();
+				
+				// 컴퓨터 답지
+				if (BingoNumbers.Callednumbers.size() < NSIZE * NSIZE) {
+					BingoNumbers.Callednumbers.add(grid[row][col].getValue());
+				}
+
+
+				int xCoord = (int) square.getX() + (SQUARE_SIZE / 4) - 8;
+				int yCoord = (int) square.getY() + (SQUARE_SIZE / 2) + (SQUARE_SIZE / 8) - 5;
+				if (value < 40) {
+					g2.setFont(new Font("SansSerif", Font.PLAIN, 13));
+					g2.drawString(voc.get(value).eng, xCoord, yCoord);
+				} else {
+
+					g2.setFont(new Font("SansSerif", Font.PLAIN, 11));
+					g2.drawString(voc.get(value).eng, xCoord, yCoord);
+				}
+
+
+				//칸을 나타내줄 A~ 알파벳을 그려주는 부분
+				if (row == 0) { 
+					g2.setFont(font2);
+					
+					g2.drawString(BINGO[col], (int) square.getX() + (SQUARE_SIZE / 6),
+							(int) square.getY() - (SQUARE_SIZE / 4));
+					g2.setFont(font);
+				}
+
+				
+				//컴퓨터의 판을 알려주는 Computer를 그려주는 부분
+				if (row == grid.length - 1 && col == 0) {
+					int plusposition = 60;
+					if (NSIZE == 7)
+						plusposition = 120;
+					if (checkWin()) {
+
+						if (BingoGame.WINNERCHECK == 0) {
+							g2.setFont(font2);
+							g2.setColor(Color.RED);
+							g2.drawString("Computer", (int) square.getX() + (SQUARE_SIZE / 3) * 2 + plusposition,
+									(int) square.getY() + SQUARE_SIZE + ((SQUARE_SIZE / 3) * 2) - 20);
+							g2.drawString("무승부", 600, 50);
+							g2.setFont(new Font("SansSerif", Font.PLAIN, 15));
+							g2.setColor(Color.BLUE);
+							g2.drawString("다시 하시려면 [reset], 종료하시려면 [exit]을 눌러주세요", 450, 800);
+							g2.setFont(font);
+							g2.setColor(Color.BLACK);
+						} else {
+							g2.setFont(font2);
+							g2.setColor(Color.RED);
+							g2.drawString("Computer", (int) square.getX() + (SQUARE_SIZE / 3) * 2 + plusposition,
+									(int) square.getY() + SQUARE_SIZE + ((SQUARE_SIZE / 3) * 2) - 20);
+							g2.drawString("컴퓨터 승리", 540, 50);
+							g2.setFont(new Font("SansSerif", Font.PLAIN, 15));
+							g2.setColor(Color.BLUE);
+							g2.drawString("다시 하시려면 [reset], 종료하시려면 [exit]을 눌러주세요", 450, 800);
+							g2.setFont(font);
+							g2.setColor(Color.BLACK);
+						}
+
+					} else {
+						g2.setFont(font2);
+						g2.setColor(Color.LIGHT_GRAY);
+						g2.drawString("Computer", (int) square.getX() + (SQUARE_SIZE / 3) * 2 + plusposition,
+								(int) square.getY() + SQUARE_SIZE + ((SQUARE_SIZE / 3) * 2) - 20);
+						g2.setFont(font);
+						g2.setColor(Color.BLACK);
+					}
+
+				}
+			}
+		}
+
+	}
+	
+	
+	//컴퓨터가 이길 수 있는 효율적인 방법을 찾는 역할
+	public void priocheck() {
+		int[] count1 = new int[NSIZE];	//컴퓨터 판의 row(가로)의 각 줄의 called된 단어 수를 저장
+		int[] count2 = new int[NSIZE];	//컴퓨터 판의 col(세로)의 각 줄의 called된 단어 수를 저장
+		int count3 = 0, count4 = 0;		//컴퓨터 판의 우하향, 우상향 대각선의 called된 단어 수를 저장 / 3이 우하향, 4가 우상향
+		int nullcheck = 0;				//가장 처음에 단어를 add 해줄 때 배열이 비어있나 확인해주는 역할
+		int nullcount = 0;				//위와 같은 부분에서 사용
+		int maxcount = 0;				//가장 많은 called grid가 있는 줄이 어느 줄인지 확인할 때 비교를 위한 변
+		int maxcountindex = 0;			//위와 같은 부분에서 사용되는데, 대각선이 아닌 row, col이 선택된다면 그때 몇 번째 줄인지 확인하기 위함
+		int whatline = 3;				//1은 row, 2는 col, 3은 우하향, 4는 우상향을 나타냄
+
+		
+		//처음에 랜덤하게 하나의 단어를 부르기 위함
+		for (int row = 0; row < grid.length; row++) {
+			for (int col = 0; col < grid[0].length; col++) {
+				if (!grid[row][col].getStatus()) {
+					nullcount++;
+				}
+			}
+		}
+		if (nullcount == NSIZE * NSIZE)
+			nullcheck = 1;
+		else
+			nullcheck = 0;
+
+		// 모든 칸이칠해져있지 않다면 랜덤으로 하나 고름
+		if (nullcheck == 1) {
+
+			Random generator = new Random();
+			int newNumber;
+			
+			if (BingoGrid.NSIZE == 7) {
+
+				newNumber = generator.nextInt(49); // 0 - 48
+
+			} else if (BingoGrid.NSIZE == 6) {
+
+				newNumber = generator.nextInt(36); // 0 - 48
+
+			} else {
+
+				newNumber = generator.nextInt(25); // 0 - 24
+
+			}
+
+			BingoNumbers.numbers.add(BingoNumbers.Callednumbers.get(newNumber));
+
+		} 
+		else {
+			// checks the row
+			for (int row = 0; row < grid.length; row++) {
+				count1[row] = 0;
+				for (int col = 0; col < grid[0].length; col++) {
+					if (grid[row][col].getStatus()) {
+
+						count1[row]++;
+					}
+				}
+			}
+
+			// checks the columns
+			for (int col = 0; col < grid[0].length; col++) {
+				count2[col] = 0;
+				for (int row = 0; row < grid.length; row++) {
+					if (grid[row][col].getStatus()) {
+						count2[col]++;
+					}
+				}
+			}
+
+			// 대각선 체크 우하향
+			count3 = 0;
+			for (int index = 0; index < grid.length; index++) {
+				BingoSquare square = grid[index][index];
+				if (square.getStatus()) {
+					count3++;
+				}
+			}
+
+			// 대각선 체크 우상향
+			count4 = 0;
+			for (int index = grid.length - 1; index >= 0; index--) {
+				BingoSquare square = grid[index][(grid.length - 1) - index];
+				if (square.getStatus()) {
+					count4++;
+				}
+			}
+
+			// 여기는 모든 줄의 선택 당한 상태를 받은 상태임. 즉 count1,2,3,4 에 정보가 담겨 있어야 정상..
+
+			// count들의 값을 비교해서 최대를 찾아줄 것임.
+			// 3 4부터 해주고 이를 배열와 비교할 거임.
+			if (count3 >= count4 && (count3 != NSIZE && count4 != NSIZE)) {
+				if (count3 == NSIZE) {
+					maxcount = count4;
+					whatline = 4;
+				} else {
+					maxcount = count3;
+					whatline = 3;
+				}
+
+			} else {
+				if (count4 == NSIZE)
+					;
+				else {
+					maxcount = count4;
+					whatline = 4;
+				}
+			}
+			// maxcountindex는 어떤 줄의 몇 번째 칸인지를 말해줌
+			for (int i = 0; i < NSIZE; i++) {
+				if (count1[i] > maxcount) {
+					if (count1[i] == NSIZE)
+						break;
+					maxcount = count1[i];
+					maxcountindex = i;
+					whatline = 1;
+				}
+				if (count2[i] > maxcount) {
+					if (count2[i] == NSIZE)
+						break;
+					maxcount = count2[i];
+					maxcountindex = i;
+					whatline = 2;
+				}
+			}
+
+			// 무슨 줄을 선택해야 가장 효율적인지 whatline은 row,col,우하향, 우상향 중 무엇인지
+			// maxcountindex는 만약 row or col 이라면 몇 번째 줄인지를 저장하고 있다.
+			
+			int JULNum = 4;
+			switch (whatline) {
+			case 1: // row
+				for (int col = 0; col < grid[0].length; col++) {
+					if (!grid[maxcountindex][col].getStatus()) {
+						JULNum = col;
+					}
+				}
+				break;
+			case 2: // col
+				for (int row = 0; row < grid.length; row++) {
+					if (!grid[row][maxcountindex].getStatus()) {
+						JULNum = row;
+					}
+				}
+				break;
+			case 3: // 우하향
+				for (int index = 0; index < grid.length; index++) {
+					BingoSquare square = grid[index][index];
+					if (!square.getStatus()) {
+						JULNum = index;
+					}
+				}
+				break;
+			case 4:// 우상향
+				for (int index = grid.length - 1; index >= 0; index--) {
+					BingoSquare square = grid[index][(grid.length - 1) - index];
+					if (!square.getStatus()) {
+						JULNum = index;
+					}
+				}
+				break;
+			}
+
+			// number에 넣기
+			switch (whatline) {
+			case 1: // row
+				BingoNumbers.numbers.add(grid[maxcountindex][JULNum].getValue());
+				break;
+			case 2: // col
+				BingoNumbers.numbers.add(grid[JULNum][maxcountindex].getValue());
+				break;
+			case 3: // 우하향
+				BingoNumbers.numbers.add(grid[JULNum][JULNum].getValue());
+
+				break;
+			case 4:// 우상향
+				BingoNumbers.numbers.add(grid[JULNum][(grid.length - 1) - JULNum].getValue());
+				break;
+			}
+
+		}
+
+	}
+
+	public void highlightSquare() {
+		for (int x : BingoNumbers.numbers) {
+			for (int row = 0; row < NSIZE; row++) {
+				for (int col = 0; col < NSIZE; col++) {
+					if (x == grid[row][col].getValue()) {
+						grid[row][col].setStatus(true);
+						grid[row][col].setIsClicked(true);
+					}
+
+				}
+			}
+		}
+		for (int x : BingoNumbers.pnumbers) {
+			for (int row = 0; row < NSIZE; row++) {
+				for (int col = 0; col < NSIZE; col++) {
+					if (x == grid[row][col].getValue()) {
+						grid[row][col].setStatus(true);
+						grid[row][col].setIsClicked(true);
+					}
+				}
+			}
+		}
+	}
+}
