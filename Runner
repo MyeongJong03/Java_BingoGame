@@ -1,0 +1,53 @@
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+public class Runner
+{
+	
+    public static void main(String[] args) {
+    	//사이즈 선택 사이즈의 범위는 5~7
+    	String[] ChooseSize = {"7x7", "6x6","5x5"};
+    	int num = JOptionPane.showOptionDialog(null, "빙고 게임판의 사이즈를 선택하세요\n기본 선택 값 : 5x5","안내",
+    			JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, ChooseSize, "5x5");
+    	if(num == 0) {
+    		BingoGrid.SQUARE_SIZE = 85;
+    		BingoGrid.NSIZE = 7;
+    		 		
+    	}
+    	else if(num == 1) {
+    		BingoGrid.SQUARE_SIZE = 87;
+    		BingoGrid.NSIZE = 6;
+    		 		
+    	}else {
+    		BingoGrid.SQUARE_SIZE = 90;
+    		BingoGrid.NSIZE = 5;
+    	}
+    	
+    	//승리 조건 설정 1, 2, 3 빙고 중 고를 수 있다. 
+    	String[] ChooseBingo = {"3-Bingo", "2-Bingo","1-Bingo"};
+    	int Bingosize = JOptionPane.showOptionDialog(null, "승리 조건을 선택하세요\n기본 선택 값 : 3-Bingo","안내",
+    			JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, ChooseBingo, "3-Bingo");
+    	if(Bingosize == 0) {
+    		BingoGrid.winBingo = 3;
+    		 		
+    	}
+    	else if(Bingosize == 1) {
+    		BingoGrid.winBingo = 2;
+    		 		
+    	}else {
+    		BingoGrid.winBingo = 1;
+    	}
+    	
+    	//사용자가 선택한 정보를 출력해주고 게임 시작을 알려주는 역할
+    	JOptionPane.showMessageDialog(null, "빙고 게임판 사이즈 : "+BingoGrid.NSIZE+"x"+BingoGrid.NSIZE+"\n"
+    			+"빙고 승리 조건 : "+BingoGrid.winBingo+"-Bingo", 
+       			"게임을 시작합니다", JOptionPane.INFORMATION_MESSAGE);
+
+    	
+        BingoGame game = new BingoGame();
+        
+        game.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        game.setVisible(true);
+    }
+}
