@@ -1,0 +1,77 @@
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+
+public class LogSave {
+
+	public int p_win = 0;
+	public int c_win = 0;
+	public double p_win_rate = 50.0;
+
+	public static String filePath = "playRecord.txt";
+
+	public LogSave(String string) {
+		filePath = string;
+	}
+
+	public void write(Object o1, Object o2) {
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd kk:mm:ss", Locale.getDefault());
+		String date = sdf.format(cal.getTime());
+		String out = "[" + date + "]";
+		String out1 = (String) o1;
+		String out2 = (String) o2;
+
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true))) {
+			bw.append(out);
+			bw.newLine();
+			bw.append(out1);
+			bw.newLine();
+			bw.append(out2);
+			bw.newLine();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void read() {
+
+		Path path = Paths.get(filePath);
+
+		try {
+			List<String> allLines = Files.readAllLines(path);
+
+			if (allLines.size() < 3) {
+			} else {
+
+				String nthLine = allLines.get(allLines.size() - 2);
+				int result = Integer.valueOf(nthLine);
+				p_win = result;
+
+				nthLine = allLines.get(allLines.size() - 1);
+				result = Integer.valueOf(nthLine);
+				c_win = result;
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static String getFilePath() {
+		return filePath;
+	}
+
+	public static void setFilePath(String filePath) {
+		LogSave.filePath = filePath;
+	}
+}
