@@ -1,0 +1,34 @@
+
+public class Quiz {
+
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return eng.hashCode()+kor.hashCode();
+	}
+
+	public int F_voc, W_voc;
+	String eng;
+	String kor;
+	
+	
+	public Quiz(String string, String kor) {
+		super();
+		this.eng = string;
+		this.kor = kor;
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub		
+		return eng+" : "+kor;
+	}
+	
+	
+	@Override
+	public boolean equals(Object obj) {
+		Quiz tmp = (Quiz)obj;
+		boolean result = this.eng.equals(tmp.eng) && this.kor.equals(tmp.kor);
+		return result;
+	}
+}
